@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>CHINACNU 基础价格表（来自 Google Sheets 实时加载）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #1a73e8;
+        }
+        table {
+            background: white;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>CHINACNU 实时价格表（Google 表格驱动）</h1>
+
+    <div id="price-table">正在加载数据，请稍候...</div>
+
+    <script>
+    const sheetId = "1G9-AbjNktM5u1eOC0it4qua-HHgXLwDU";
+    const sheetName = "彩涂板(新增)";
+    const range = "A1:I50";
+    const apiKey = "AIzaSyB-io6C9S0y5I6YXMi9TrDbAx8PkC2ReKo";
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${encodeURIComponent(sheetName)}'!${range}?key=${apiKey}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.values || data.values.length === 0) {
+          document.getElementById("price-table").innerHTML = "⚠️ 表格中没有可用数据，请检查 Google 表格是否已公开并包含内容。";
+          return;
+        }
+
+        const rows = data.values;
+        let html = "<table><thead><tr>";
+        rows[0].forEach(col => html += `<th>${col}</th>`);
+        html += "</tr></thead><tbody>";
+        for (let i = 1; i < rows.length; i++) {
+          html += "<tr>";
+          rows[i].forEach(cell => html += `<td>${cell}</td>`);
+          html += "</tr>";
+        }
+        html += "</tbody></table>";
+        document.getElementById("price-table").innerHTML = html;
+      })
+      .catch(err => {
+        document.getElementById("price-table").innerHTML = "❌ 加载失败，请检查 API 密钥、表格权限或网络连接。";
+        console.error("加载出错:", err);
+      });
+    </script>
+</body>
+</html>
