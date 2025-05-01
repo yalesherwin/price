@@ -7,10 +7,32 @@
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     h1 { color: #1a73e8; }
     h2 { color: #333; margin-top: 40px; }
-    table { background: white; width: 100%; border-collapse: collapse; margin-bottom: 40px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #eee; }
-    .error { color: red; }
+    .table-wrapper {
+      overflow-x: auto;
+      background: white;
+      padding: 10px;
+      margin-bottom: 40px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    table {
+      border-collapse: collapse;
+      white-space: nowrap;
+      width: max-content;
+      min-width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -21,8 +43,6 @@
     const sheetId = "1L8RGRPI7BdIlDew99K7QIXU5f7llOLqWqskwXb1lms4";
     const apiKey = "AIzaSyB-io6C9S0y5I6YXMi9TrDbAx8PkC2ReKo";
     const range = "A1:Z100";
-
-    // 👇 你可以自由增删表格名称（确保与 Google 表格中的工作表名一致）
     const sheetNames = [
       "涨跌记录",
       "彩涂板(新增)",
@@ -35,7 +55,7 @@
       "热卷价格",
       "镀锌带钢",
       "国际型钢",
-      "中国型钢",
+      "中国型钢"
     ];
 
     const container = document.getElementById("tables");
@@ -61,6 +81,9 @@
             return;
           }
 
+          const wrapper = document.createElement("div");
+          wrapper.className = "table-wrapper";
+
           const table = document.createElement("table");
           const thead = document.createElement("thead");
           const tbody = document.createElement("tbody");
@@ -85,7 +108,8 @@
           }
 
           table.appendChild(tbody);
-          section.appendChild(table);
+          wrapper.appendChild(table);
+          section.appendChild(wrapper);
           container.appendChild(section);
         })
         .catch(err => {
@@ -97,3 +121,4 @@
   </script>
 </body>
 </html>
+
