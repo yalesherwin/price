@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>CHINACNU 所有价格表（实时同步 Google 表格）</title>
+  <title>CHINACNU 所有价格表（自动隐藏成本）</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     h1 { color: #1a73e8; }
@@ -36,7 +36,7 @@
   </style>
 </head>
 <body>
-  <h1>CHINACNU 实时价格表（多 Sheet 同步）</h1>
+  <h1>CHINACNU 实时价格表（隐藏成本列）</h1>
   <div id="tables"></div>
 
   <script>
@@ -81,17 +81,24 @@
             return;
           }
 
+          // 识别非“成本”字段的列索引
+          const visibleIndexes = [];
+          data.values[0].forEach((col, i) => {
+            if (!String(col).includes("成本")) {
+              visibleIndexes.push(i);
+            }
+          });
+
           const wrapper = document.createElement("div");
           wrapper.className = "table-wrapper";
-
           const table = document.createElement("table");
           const thead = document.createElement("thead");
           const tbody = document.createElement("tbody");
 
           const headerRow = document.createElement("tr");
-          data.values[0].forEach(cell => {
+          visibleIndexes.forEach(i => {
             const th = document.createElement("th");
-            th.textContent = cell;
+            th.textContent = data.values[0][i];
             headerRow.appendChild(th);
           });
           thead.appendChild(headerRow);
@@ -99,9 +106,9 @@
 
           for (let i = 1; i < data.values.length; i++) {
             const row = document.createElement("tr");
-            data.values[i].forEach(cell => {
+            visibleIndexes.forEach(j => {
               const td = document.createElement("td");
-              td.textContent = cell;
+              td.textContent = data.values[i][j] || "";
               row.appendChild(td);
             });
             tbody.appendChild(row);
@@ -121,4 +128,3 @@
   </script>
 </body>
 </html>
-
