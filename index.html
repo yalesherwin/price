@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>CHINACNU 所有价格表（完整显示）</title>
+  <title>CHINACNU 所有价格表（完整展示）</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     h1 { color: #1a73e8; }
@@ -51,7 +51,7 @@
 <body>
   <h1>CHINACNU 实时价格表</h1>
 
-  <div class="nav" id="nav"></div> <!-- 顶部导航目录 -->
+  <div class="nav" id="nav"></div> <!-- 目录导航 -->
 
   <div id="tables"></div>
 
@@ -77,7 +77,7 @@
     const container = document.getElementById("tables");
     const nav = document.getElementById("nav");
 
-    // ⬆️ 生成导航目录
+    // ⬆️ 创建导航
     sheetNames.forEach(sheetName => {
       const link = document.createElement("a");
       link.href = `#${sheetName}`;
@@ -85,7 +85,7 @@
       nav.appendChild(link);
     });
 
-    // ⬇️ 加载每个工作表内容
+    // ⬇️ 加载每个 Sheet
     sheetNames.forEach(sheetName => {
       const encodedName = encodeURIComponent(sheetName);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${encodedName}'!${range}?key=${apiKey}`;
@@ -94,7 +94,7 @@
         .then(res => res.json())
         .then(data => {
           const section = document.createElement("div");
-          section.id = sheetName; // 设置锚点
+          section.id = sheetName;
 
           const title = document.createElement("h2");
           title.textContent = sheetName;
@@ -109,8 +109,9 @@
             return;
           }
 
-          // ✅ 全部列都显示（不隐藏）
-          const visibleIndexes = data.values[0].map((_, i) => i);
+          // ✅ 自动使用最长一行的列数，防止列丢失
+          const longestRow = data.values.reduce((a, b) => (b.length > a.length ? b : a), []);
+          const visibleIndexes = longestRow.map((_, i) => i);
 
           const wrapper = document.createElement("div");
           wrapper.className = "table-wrapper";
@@ -121,7 +122,7 @@
           const headerRow = document.createElement("tr");
           visibleIndexes.forEach(i => {
             const th = document.createElement("th");
-            th.textContent = data.values[0][i];
+            th.textContent = data.values[0][i] || "";
             headerRow.appendChild(th);
           });
           thead.appendChild(headerRow);
