@@ -37,8 +37,8 @@
 
     <script>
     const sheetId = "1G9-AbjNktM5u1eOC0it4qua-HHgXLwDU";
-    const sheetName = "彩涂板(新增)";
-    const range = "A1:I50";
+    const sheetName = "涨跌记录";
+    const range = "A1:Z100";
     const apiKey = "AIzaSyB-io6C9S0y5I6YXMi9TrDbAx8PkC2ReKo";
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${encodeURIComponent(sheetName)}'!${range}?key=${apiKey}`;
@@ -46,6 +46,7 @@
     fetch(url)
       .then(res => res.json())
       .then(data => {
+        console.log("Google Sheets 返回数据：", data); // ✅ 调试输出
         if (!data.values || data.values.length === 0) {
           document.getElementById("price-table").innerHTML = "⚠️ 表格中没有可用数据，请检查 Google 表格是否已公开并包含内容。";
           return;
@@ -70,3 +71,4 @@
     </script>
 </body>
 </html>
+
