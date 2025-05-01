@@ -1,73 +1,99 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <title>CHINACNU 基础价格表（来自 Google Sheets 实时加载）</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            max-width: 1200px;
-            margin: auto;
-            background: #f5f5f5;
-        }
-        h1 {
-            color: #1a73e8;
-        }
-        table {
-            background: white;
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 40px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #eee;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>CHINACNU 所有价格表（实时同步 Google 表格）</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { color: #1a73e8; }
+    h2 { color: #333; margin-top: 40px; }
+    table { background: white; width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+    .error { color: red; }
+  </style>
 </head>
 <body>
-    <h1>CHINACNU 实时价格表（Google 表格驱动）</h1>
+  <h1>CHINACNU 实时价格表（多 Sheet 同步）</h1>
+  <div id="tables"></div>
 
-    <div id="price-table">正在加载数据，请稍候...</div>
-
-    <script>
+  <script>
     const sheetId = "1L8RGRPI7BdIlDew99K7QIXU5f7llOLqWqskwXb1lms4";
-    const sheetName = "涨跌记录";  // 请确保与你表格底部工作表名一致
-    const range = "A1:Z100";
     const apiKey = "AIzaSyB-io6C9S0y5I6YXMi9TrDbAx8PkC2ReKo";
+    const range = "A1:Z100";
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${encodeURIComponent(sheetName)}'!${range}?key=${apiKey}`;
+    // 👇 你可以自由增删表格名称（确保与 Google 表格中的工作表名一致）
+    const sheetNames = [
+      "涨跌记录",
+      "彩涂板(新增)",
+      "有花镀锌 厚板",
+      "有花镀锌 (薄板)带精包",
+      "彩基板",
+      "镀铝锌无耐指纹",
+      "彩涂漆膜12-5",
+      "罩退冷轧卷板",
+      "热卷价格",
+      "镀锌带钢",
+      "国际型钢",
+      "中国型钢",
+    ];
 
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        console.log("Google Sheets 返回数据：", data); // ✅ 调试输出
-        if (!data.values || data.values.length === 0) {
-          document.getElementById("price-table").innerHTML = "⚠️ 表格中没有可用数据，请检查 Google 表格是否已公开并包含内容。";
-          return;
-        }
+    const container = document.getElementById("tables");
 
-        const rows = data.values;
-        let html = "<table><thead><tr>";
-        rows[0].forEach(col => html += `<th>${col}</th>`);
-        html += "</tr></thead><tbody>";
-        for (let i = 1; i < rows.length; i++) {
-          html += "<tr>";
-          rows[i].forEach(cell => html += `<td>${cell}</td>`);
-          html += "</tr>";
-        }
-        html += "</tbody></table>";
-        document.getElementById("price-table").innerHTML = html;
-      })
-      .catch(err => {
-        document.getElementById("price-table").innerHTML = "❌ 加载失败，请检查 API 密钥、表格权限或网络连接。";
-        console.error("加载出错:", err);
-      });
-    </script>
+    sheetNames.forEach(sheetName => {
+      const encodedName = encodeURIComponent(sheetName);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${encodedName}'!${range}?key=${apiKey}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const section = document.createElement("div");
+          const title = document.createElement("h2");
+          title.textContent = sheetName;
+          section.appendChild(title);
+
+          if (!data.values || data.values.length === 0) {
+            const error = document.createElement("p");
+            error.className = "error";
+            error.textContent = "⚠️ 表格中无数据或加载失败";
+            section.appendChild(error);
+            container.appendChild(section);
+            return;
+          }
+
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const tbody = document.createElement("tbody");
+
+          const headerRow = document.createElement("tr");
+          data.values[0].forEach(cell => {
+            const th = document.createElement("th");
+            th.textContent = cell;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+
+          for (let i = 1; i < data.values.length; i++) {
+            const row = document.createElement("tr");
+            data.values[i].forEach(cell => {
+              const td = document.createElement("td");
+              td.textContent = cell;
+              row.appendChild(td);
+            });
+            tbody.appendChild(row);
+          }
+
+          table.appendChild(tbody);
+          section.appendChild(table);
+          container.appendChild(section);
+        })
+        .catch(err => {
+          const errorSection = document.createElement("div");
+          errorSection.innerHTML = `<h2>${sheetName}</h2><p class="error">❌ 加载失败：${err.message}</p>`;
+          container.appendChild(errorSection);
+        });
+    });
+  </script>
 </body>
 </html>
