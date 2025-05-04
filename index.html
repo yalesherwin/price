@@ -46,10 +46,18 @@
       color: #1a73e8;
       font-weight: bold;
     }
+    #current-time {
+      font-size: 18px;
+      color: #333;
+      text-align: right;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>CHINACNU 实时价格表</h1>
+
+  <div id="current-time"></div> <!-- 实时时间区域 -->
 
   <div class="nav" id="nav"></div> <!-- 目录导航 -->
 
@@ -77,7 +85,7 @@
     const container = document.getElementById("tables");
     const nav = document.getElementById("nav");
 
-    // ⬆️ 创建导航
+    // 创建导航
     sheetNames.forEach(sheetName => {
       const link = document.createElement("a");
       link.href = `#${sheetName}`;
@@ -85,7 +93,7 @@
       nav.appendChild(link);
     });
 
-    // ⬇️ 加载每个 Sheet
+    // 加载每个 Sheet
     sheetNames.forEach(sheetName => {
       const encodedName = encodeURIComponent(sheetName);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${encodedName}'!${range}?key=${apiKey}`;
@@ -109,7 +117,7 @@
             return;
           }
 
-          // ✅ 自动使用最长一行的列数，防止列丢失
+          // 自动使用最长一行的列数，防止列丢失
           const longestRow = data.values.reduce((a, b) => (b.length > a.length ? b : a), []);
           const visibleIndexes = longestRow.map((_, i) => i);
 
@@ -149,6 +157,25 @@
           container.appendChild(errorSection);
         });
     });
+
+    // 实时更新时间，显示年-月-日 时:分:秒
+    function updateTime() {
+      const now = new Date();
+      const year = now.getFullYear(); // 年
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // 月
+      const day = String(now.getDate()).padStart(2, '0'); // 日
+      const hours = String(now.getHours()).padStart(2, '0'); // 时
+      const minutes = String(now.getMinutes()).padStart(2, '0'); // 分
+      const seconds = String(now.getSeconds()).padStart(2, '0'); // 秒
+      const timeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      document.getElementById('current-time').textContent = `当前时间: ${timeString}`;
+    }
+
+    // 每秒更新时间
+    setInterval(updateTime, 1000);
+
+    // 页面加载时显示时间
+    updateTime();
   </script>
 </body>
 </html>
